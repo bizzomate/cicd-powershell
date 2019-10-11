@@ -14,7 +14,7 @@ Param(
     [Boolean]$setconfiguration
 )
 
-# Check if the functions script is in place.
+# Check if the functions script named 'mendix_ci_functions.ps1' is in place.
 $scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 try {
     . ("$ScriptDirectory\mendix_ci_functions.ps1")
@@ -29,13 +29,13 @@ if (!$apiheaders) {
     exit
 }
 
-if (!$envconfig) {
+if (!$environmentconfig) {
     Write-Host "Environment configuration is required."
     exit
 }
 
 # INCLUDE FUNCTIONS FILE
-Include '.\mendix_ci_functions.ps1'
+. ("$ScriptDirectory\mendix_ci_functions.ps1")
 
 # STATIC VARIABLE ENDPOINT
 $url = 'https://deploy.mendix.com/api/1/'
