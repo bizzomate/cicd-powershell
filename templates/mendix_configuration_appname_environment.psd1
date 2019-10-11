@@ -6,21 +6,21 @@
         BranchName  = '<trunk/branch-name>'
     }
     
-    #Scheduled events that are set active (Name: Value)
+    # Scheduled events that are set active (Name: Value)
     ScheduledEvents = @{
-        'Module.ScheduledEventname' = "Enabled"
-        'Module.ScheduledEventname2' = "Disabled"
+        # 'Module.ScheduledEventname' = "Enabled"
+        # 'Module.ScheduledEventname2' = "Disabled"
     }
     
-    #Constants to set before start
-    #Only contstants to set different from the default could be set.
+    # Constants to set before start
+    # Only contstants to set different from the default could be set.
     Constants = @{
-        'Module.ConstantName' = "Value"
-        'Module2.ConstantName' = "Value2"
+        # 'Module.ConstantName' = "Value"
+        # 'Module2.ConstantName' = "Value2"
     }
 
-    #Custom runtime settings (Name & Value)
+    # Custom runtime settings (Name & Value)
     CustomSettings  = @{
-        'PersistentSessions' = "false"
+        # 'PersistentSessions' = "false"
     }
 }

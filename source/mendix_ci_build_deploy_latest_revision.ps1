@@ -23,7 +23,7 @@ catch {
     Write-Host "Error while loading required supporting PowerShell Scripts."
 }
 
-#FIRST CHECK INPUT OF REQUIRED VARIABLE
+# FIRST CHECK INPUT OF REQUIRED VARIABLE
 if (!$apiheaders) {
     Write-Host "API headers are required."
     exit
@@ -73,9 +73,9 @@ if($built -eq $false) {
 
 if ($dodeploy) {
     Stop-App $headers $url $appName $environment
-    #Clear-App $headers $url $appName $environment
+    # Clear-App $headers $url $appName $environment
     Move-Package $headers $url $appName $environment $packageId
-    #TODO Set config when requested
+    # TODO Set config when requested
     $startJobId = Start-App $headers $url $appName $environment
     $started = Wait-For-Start $headers $url $appName $environment $startJobId 600
 
