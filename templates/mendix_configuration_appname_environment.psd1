@@ -1,5 +1,5 @@
 @{
-    #Environment to build and deploy for
+    # Environment to build and deploy for
     Environment     = @{
         AppName     = '<app-name>'
         Environment = '<Test/Accp/Prod>'
