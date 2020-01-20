@@ -1,0 +1,2 @@
+@ECHO OFF
+PowerShell.exe -NoProfile -ExecutionPolicy Bypass -Command "& '<ABSOLUTE_PATH_TO>\mendix_ci_build_deploy_latest_revision.ps1' -apiheaders '<ABSOLUTE_PATH_TO>\<MENDIX_API_CREDENTIALS_FILENAME>.psd1' -environmentconfig '<ABSOLUTE_PATH_TO>\environmentconfigs\<MENDIX_ENVIRONMENT_CONFIGURATION_FILENAME>.psd1'"
