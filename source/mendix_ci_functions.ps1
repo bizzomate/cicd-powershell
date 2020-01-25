@@ -1,3 +1,15 @@
+function LogMessage () {
+    param(
+        [Parameter(Mandatory=$true)][string]$message,
+        [ValidateSet("DEBUG", "INFO", "WARNING","ERROR")][string]$type="INFO"
+    )
+
+    $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+    $output = "$date $type - $message"
+    
+    Write-output $output
+}
+
 Function Get-Branch($headers, $url, $appName, $branchName) {
     Invoke-RestMethod -Headers $headers ${url}apps/$appName/branches/$branchName
 }
@@ -10,7 +22,7 @@ Function Start-Build($headers, $url, $appName, $branchName, $revision, $version)
         'Description' = 'CI Build $((Get-Date).ToString('s'))'
     }"
 
-    Write-Host "Start build with the following input: $buildinput"
+    LogMessage -message "Start build with the following input: $buildinput"
     $buildResult = $buildinput | Invoke-RestMethod -Headers $headers -ContentType "application/json" -Method Post ${url}apps/$appName/packages/
     $buildResult.PackageId
 }
@@ -22,7 +34,7 @@ Function Wait-For-Built($headers, $url, $appName, $packageId, $timeOutSeconds) {
         $duration = ((Get-Date) - $date).TotalSeconds
 
         if($duration -gt $timeOutSeconds) {
-            Write-Host "Build timed out after $duration"
+            LogMessage -message "Build timed out after $duration"
 
             return $false
         }
@@ -31,7 +43,7 @@ Function Wait-For-Built($headers, $url, $appName, $packageId, $timeOutSeconds) {
         $package = Get-Package $headers $url $appName $packageId
 
         if($package.Status -eq 'Succeeded') {
-            Write-Host "Built package: $package"
+            LogMessage -message "Built package: $package"
 
             return $true
         }
@@ -44,17 +56,17 @@ Function Get-Package($headers, $url, $appName, $packageId) {
 
 Function Move-Package($headers, $url, $appName, $environment, $packageId) {
     $transportInput = "{ 'PackageId' = '$packageId' }"
-    Write-Host "Transport package with the following input: $transportInput"
+    LogMessage -message "Transport package with the following input: $transportInput"
     $transportInput | Invoke-RestMethod -Headers $headers -ContentType "application/json" -Method Post ${url}apps/$appName/environments/$environment/transport
 }
 
 Function Stop-App($headers, $url, $appName, $environment) {
-    Write-Host "Stop app $appName ($environment)"
+    LogMessage -message "Stop app $appName ($environment)"
     Invoke-RestMethod -Headers $headers -Method Post ${url}apps/$appName/environments/$environment/stop
 }
 
 Function Start-App($headers, $url, $appName, $environment) {
-    Write-Host "Start app $appName ($environment)"
+    LogMessage -message "Start app $appName ($environment)"
     $startJob = "{ 'AutoSyncDb' = true }" | Invoke-RestMethod -Headers $headers -ContentType "application/json" -Method Post ${url}apps/$appName/environments/$environment/start
     $startJob.JobId
 }
@@ -70,7 +82,7 @@ Function Wait-For-Start($headers, $url, $appName, $environment, $jobId, $timeOut
         $duration = ((Get-Date) - $date).TotalSeconds
 
         if($duration -gt $timeOutSeconds) {
-            Write-Host "Start app timed out after $duration"
+            LogMessage -message "Start app timed out after $duration"
 
             return $false
         }
@@ -85,6 +97,6 @@ Function Wait-For-Start($headers, $url, $appName, $environment, $jobId, $timeOut
 }
 
 Function Clear-App($headers, $url, $appName, $environment) {
-    Write-Host "Clear app $appName ($environment)"
+    LogMessage -message "Clear app $appName ($environment)"
     Invoke-RestMethod -Headers $headers -Method Post ${url}apps/$appName/environments/$environment/clean
 }

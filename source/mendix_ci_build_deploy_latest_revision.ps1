@@ -20,22 +20,27 @@ try {
     . ("$ScriptDirectory\mendix_ci_functions.ps1")
 }
 catch {
-    Write-Host "Error while loading required supporting PowerShell Scripts."
+    $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+    $output = "$date ERROR - Error while loading required supporting PowerShell Scripts."
+    Write-output $output    
 }
+
+# FINALS
+$timeOutInSeconds = 600
+
+# INCLUDE FUNCTIONS FILE
+. ("$ScriptDirectory\mendix_ci_functions.ps1")
 
 # FIRST CHECK INPUT OF REQUIRED VARIABLE
 if (!$apiheaders) {
-    Write-Host "API headers are required."
+    LogMessage -message "API headers are required." -type ERROR
     exit
 }
 
 if (!$environmentconfig) {
-    Write-Host "Environment configuration is required."
+    LogMessage -message "Environment configuration is required." -type ERROR
     exit
 }
-
-# INCLUDE FUNCTIONS FILE
-. ("$ScriptDirectory\mendix_ci_functions.ps1")
 
 # STATIC VARIABLE ENDPOINT
 $url = 'https://deploy.mendix.com/api/1/'
@@ -53,21 +58,21 @@ $branchName = $configuration.Environment.BranchName
 
 $branch = Get-Branch $headers $url $appName $branchName
 
-Write-Host "Branch to build: $branch"
+LogMessage -message "Branch to build: $branch"
 $latestBuiltRevision = $branch.LatestTaggedVersion.Substring($branch.LatestTaggedVersion.LastIndexOf('.') + 1)
 $latestRevisionNumber = $branch.LatestRevisionNumber
 
 if ($latestBuiltRevision -eq $latestRevisionNumber) {
-    Write-Host "It is not needed to build, as the latest revision is already built."
+    LogMessage -message "It is not needed to build, as the latest revision is already built."
     exit
 }   
     
 $versionWithoutRevision = $branch.LatestTaggedVersion.Remove($branch.LatestTaggedVersion.LastIndexOf('.'))
 $packageId = Start-Build $headers $url $appName $branchName $latestRevisionNumber $versionWithoutRevision
-$built = Wait-For-Built $headers $url $appName $packageId 600
+$built = Wait-For-Built $headers $url $appName $packageId $timeOutInSeconds
 
 if($built -eq $false) {
-    Write-Host "No build succeeded within 10 minutes."
+    LogMessage -message "No build succeeded within 10 minutes. Check in the portal if the build succeeded." -type WARNING
     exit
 }
 
@@ -83,6 +88,6 @@ if ($dodeploy) {
     $started = Wait-For-Start $headers $url $appName $environment $startJobId 600
 
     if($started -eq $true) {
-        "App successfully started."
+        LogMessage -message "App successfully started."
     }
 }
