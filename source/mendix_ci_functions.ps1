@@ -1,13 +1,13 @@
-function LogMessage () {
-    param(
-        [Parameter(Mandatory=$true)][string]$message,
-        [ValidateSet("DEBUG", "INFO", "WARNING","ERROR")][string]$type="INFO"
-    )
+$scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 
+# Check if the functions script named 'mendix_ci_logging.ps1' is in place.
+try {
+    . ("$ScriptDirectory\mendix_ci_logging.ps1")
+}
+catch {
     $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
-    $output = "$date $type - $message"
-    
-    Write-output $output
+    $output = "$date ERROR - Error while loading required supporting PowerShell Scripts (logging)."
+    Write-output $output    
 }
 
 Function Get-Branch($headers, $url, $appName, $branchName) {

@@ -14,22 +14,32 @@ Param(
     [Boolean]$setconfiguration
 )
 
-# Check if the functions script named 'mendix_ci_functions.ps1' is in place.
+
 $scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+
+# Check if the functions script named 'mendix_ci_logging.ps1' is in place and import.
+try {
+    . ("$ScriptDirectory\mendix_ci_logging.ps1")
+}
+catch {
+    $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+    $output = "$date ERROR - Error while loading required supporting PowerShell Scripts (logging)."
+    Write-output $output    
+}
+
+# Check if the functions script named 'mendix_ci_functions.ps1' is in place and import.
 try {
     . ("$ScriptDirectory\mendix_ci_functions.ps1")
 }
 catch {
     $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
-    $output = "$date ERROR - Error while loading required supporting PowerShell Scripts."
+    $output = "$date ERROR - Error while loading required supporting PowerShell Scripts (functions)."
     Write-output $output    
 }
 
+
 # FINALS
 $timeOutInSeconds = 600
-
-# INCLUDE FUNCTIONS FILE
-. ("$ScriptDirectory\mendix_ci_functions.ps1")
 
 # FIRST CHECK INPUT OF REQUIRED VARIABLE
 if (!$apiheaders) {
@@ -56,23 +66,25 @@ $appName = $configuration.Environment.AppName
 $environment = $configuration.Environment.Environment
 $branchName = $configuration.Environment.BranchName
 
+LogMessage -message "START CI script for $appName, branch $branchName, environment $environment."
+
 $branch = Get-Branch $headers $url $appName $branchName
 
-LogMessage -message "Branch to build: $branch"
+LogMessage -message "Latest revision on branch: $branch" -type DEBUG
 $latestBuiltRevision = $branch.LatestTaggedVersion.Substring($branch.LatestTaggedVersion.LastIndexOf('.') + 1)
 $latestRevisionNumber = $branch.LatestRevisionNumber
 
 if ($latestBuiltRevision -eq $latestRevisionNumber) {
-    LogMessage -message "It is not needed to build, as the latest revision is already built."
+    LogMessage -message "It is not needed to build, as the latest revision is already built. Latest revision is $latestRevisionNumber."
     exit
 }   
-    
+
 $versionWithoutRevision = $branch.LatestTaggedVersion.Remove($branch.LatestTaggedVersion.LastIndexOf('.'))
 $packageId = Start-Build $headers $url $appName $branchName $latestRevisionNumber $versionWithoutRevision
 $built = Wait-For-Built $headers $url $appName $packageId $timeOutInSeconds
 
 if($built -eq $false) {
-    LogMessage -message "No build succeeded within 10 minutes. Check in the portal if the build succeeded." -type WARNING
+    LogMessage -message "END. No build succeeded within 10 minutes. Check in the portal if the build succeeded." -type WARNING
     exit
 }
 
@@ -91,3 +103,5 @@ if ($dodeploy) {
         LogMessage -message "App successfully started."
     }
 }
+
+LogMessage -message "END CI script for $appName, branch $branchName, environment $environment."
