@@ -70,7 +70,7 @@ LogMessage -message "START CI script for $appName, branch $branchName, environme
 
 $branch = Get-Branch $headers $url $appName $branchName
 
-LogMessage -message "Latest revision on branch: $branch" -type DEBUG
+LogMessage -message "Latest revision on branch: $branch"
 $latestBuiltRevision = $branch.LatestTaggedVersion.Substring($branch.LatestTaggedVersion.LastIndexOf('.') + 1)
 $latestRevisionNumber = $branch.LatestRevisionNumber
 
